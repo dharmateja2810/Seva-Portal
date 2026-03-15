@@ -74,7 +74,11 @@ if (config.server.nodeEnv === 'production') {
   const clientDist = path.join(__dirname, '../../client/dist');
   app.use(express.static(clientDist));
   // Catch-all: send index.html for any non-API route (React Router)
-  app.get('/*path', (_req, res) => {
+  app.get('/*path', (req, res) => {
+    if (req.path.startsWith('/api')) {
+      res.status(404).json({ success: false, message: 'Not found' });
+      return;
+    }
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
