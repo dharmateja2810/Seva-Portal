@@ -69,6 +69,16 @@ app.use('/api/complaints', complaintRoutes);
 app.use('/api/complaints', uploadRoutes);
 app.use('/api/masters', mastersRoutes);
 
+// ── Serve React frontend in production ──────────────────────────
+if (config.server.nodeEnv === 'production') {
+  const clientDist = path.join(__dirname, '../../client/dist');
+  app.use(express.static(clientDist));
+  // Catch-all: send index.html for any non-API route (React Router)
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
+
 // ── Error handling ──────────────────────────────────────────────
 app.use(notFound);
 app.use(errorHandler);

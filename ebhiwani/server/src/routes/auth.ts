@@ -62,6 +62,7 @@ function generateTokens(user: UserRow) {
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { username, password } = loginSchema.parse(req.body);
+    logger.info(`Login attempt for user: ${username}`);
 
     const [user] = await query<UserRow>(
       `SELECT id, username, full_name, email, role, module_access, password_hash, is_active
@@ -69,18 +70,28 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
       [username]
     );
 
-    if (!user || !user.is_active) {
+    if (!user) {
+      logger.warn(`User not found: ${username}`);
       res.status(401).json({ success: false, message: 'Invalid credentials' });
       return;
     }
 
+    if (!user.is_active) {
+      logger.warn(`User inactive: ${username}`);
+      res.status(401).json({ success: false, message: 'User account is inactive' });
+      return;
+    }
+
+    logger.info(`User found: ${username}, attempting password comparison`);
     const valid = await bcrypt.compare(password, user.password_hash);
+    
     if (!valid) {
-      logger.warn('Failed login attempt', { username, ip: req.ip });
+      logger.warn('Failed login attempt - invalid password', { username, ip: req.ip });
       res.status(401).json({ success: false, message: 'Invalid credentials' });
       return;
     }
 
+    logger.info(`Login successful for user: ${username}`);
     const { accessToken, refreshToken } = generateTokens(user);
 
     // Store hashed refresh token

@@ -23,7 +23,7 @@ INSERT INTO complaint_categories (name, module, sla_days) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Default admin user
--- Password: Admin@123  (bcrypt hash — regenerate in production)
+-- Password: Admin@123
 INSERT INTO users (username, full_name, email, role, module_access, password_hash)
 VALUES (
   'admin',
@@ -31,8 +31,7 @@ VALUES (
   'admin@ebhiwani.gov.in',
   'phed_admin',
   '{"phed","dc","court","np"}',
-  '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TiptXM7e/hMCDHtS9VHFpWxrJaUW'
-  -- This hash is for: Admin@123  — CHANGE IN PRODUCTION
+  '$2b$12$tp6M9zA2B5UqG2nqvkfO4uhuFW4tVZcN/hQpvACKC7JSJZGHCrZm2'
 ) ON CONFLICT (username) DO NOTHING;
 
 -- PHED Nodal Officer
@@ -43,7 +42,7 @@ VALUES (
   'rajesh@ebhiwani.gov.in',
   'phed_nodal',
   '{"phed"}',
-  '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TiptXM7e/hMCDHtS9VHFpWxrJaUW'
+  '$2b$12$tp6M9zA2B5UqG2nqvkfO4uhuFW4tVZcN/hQpvACKC7JSJZGHCrZm2'
 ) ON CONFLICT (username) DO NOTHING;
 
 -- DC Office user (monitoring only)
@@ -54,5 +53,5 @@ VALUES (
   'dc@ebhiwani.gov.in',
   'dc_monitor',
   '{"phed","dc"}',
-  '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TiptXM7e/hMCDHtS9VHFpWxrJaUW'
+  '$2b$12$tp6M9zA2B5UqG2nqvkfO4uhuFW4tVZcN/hQpvACKC7JSJZGHCrZm2'
 ) ON CONFLICT (username) DO NOTHING;

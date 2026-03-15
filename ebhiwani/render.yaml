@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: ebhiwani-api
+    runtime: node
+    rootDir: ebhiwani
+    buildCommand: |
+      cd server && npm install && npm run build &&
+      cd ../client && npm install && npm run build
+    startCommand: node server/dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ebhiwani-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: PII_ENCRYPTION_KEY
+        sync: false        # you'll paste this manually in dashboard
+      - key: CORS_ORIGINS
+        sync: false        # paste your render URL after first deploy
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+
+databases:
+  - name: ebhiwani-db
+    databaseName: ebhiwani
+    plan: free

@@ -2,17 +2,27 @@ import { Pool } from 'pg';
 import { config } from '../config';
 import { logger } from '../utils/logger';
 
-export const pool = new Pool({
-  host: config.db.host,
-  port: config.db.port,
-  user: config.db.user,
-  password: config.db.password,
-  database: config.db.database,
-  ssl: config.db.ssl ? { rejectUnauthorized: false } : false,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+export const pool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false },  // required on Render
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 2000,
+      }
+    : {
+        host: config.db.host,
+        port: config.db.port,
+        user: config.db.user,
+        password: config.db.password,
+        database: config.db.database,
+        ssl: config.db.ssl ? { rejectUnauthorized: false } : false,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 2000,
+      }
+);
 
 pool.on('connect', () => {
   logger.info('PostgreSQL pool connected');

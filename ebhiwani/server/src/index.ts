@@ -3,6 +3,7 @@ import { config } from './config';
 import { logger } from './utils/logger';
 import { pool } from './db/pool';
 import { startScheduler } from './services/scheduler';
+import { runMigrations } from './db/migrate';
 
 const PORT = config.server.port;
 
@@ -11,6 +12,10 @@ async function start() {
     // Verify DB connection
     await pool.query('SELECT 1');
     logger.info('Database connection verified');
+
+    // Run database migrations (idempotent — safe to run every boot)
+    await runMigrations();
+    logger.info('Database migrations completed');
 
     // Start background scheduler
     startScheduler();
