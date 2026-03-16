@@ -50,7 +50,7 @@ export default function ComplaintDetail() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['complaint', id],
     queryFn: () => complaintsApi.get(Number(id)).then((r) => r.data.data),
     enabled: !!id,
@@ -150,10 +150,14 @@ export default function ComplaintDetail() {
   }
 
   if (isLoading) return <Loader />;
-  if (!data) return <div className="flex flex-col items-center justify-center py-32 text-brand-400/60">
-    <FileText className="w-16 h-16 mb-4 opacity-40 text-brand-300" />
-    <span className="text-lg font-medium text-brand-500/70">Complaint not found</span>
-  </div>;
+  if (isError || !data) return (
+    <div className="flex flex-col items-center justify-center py-32 text-brand-400/60">
+      <FileText className="w-16 h-16 mb-4 opacity-40 text-brand-300" />
+      <span className="text-lg font-medium text-brand-500/70">
+        {isError ? 'Failed to load complaint' : 'Complaint not found'}
+      </span>
+    </div>
+  );
 
   const canEdit = user?.role !== 'dc_viewer';
   const isAdmin = user?.role === 'phed_admin' || user?.role === 'system_admin';

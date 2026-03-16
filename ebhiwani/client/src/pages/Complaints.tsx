@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, RefreshCw, FileSearch } from 'lucide-react';
 import { complaintsApi, mastersApi } from '@/api';
@@ -13,6 +13,8 @@ const STATUSES = ['', 'New', 'Pending', 'In Progress', 'Resolved', 'Closed'];
 
 export default function Complaints() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.startsWith('/dc') ? '/dc' : '';
   const { user } = useAuthStore();
   const canRegister = ['phed_admin', 'phed_updater'].includes(user?.role ?? '');
   const [page, setPage] = useState(1);
@@ -67,7 +69,7 @@ export default function Complaints() {
           )}
         </div>
         {canRegister && (
-          <button onClick={() => navigate('/register')} className="btn-primary flex items-center gap-2">
+          <button onClick={() => navigate(`${basePath}/register`)} className="btn-primary flex items-center gap-2">
             + Register Complaint
           </button>
         )}
@@ -151,7 +153,7 @@ export default function Complaints() {
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.04, duration: 0.25 }}
-                      onClick={() => navigate(`/complaints/${String(c.id)}`)}
+                      onClick={() => navigate(`${basePath}/complaints/${String(c.id)}`)}
                       className="hover:bg-brand-50 transition-colors cursor-pointer"
                     >
                       <td className="px-5 py-3 font-mono font-semibold text-brand-700">

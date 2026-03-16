@@ -144,7 +144,9 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
 
     const [complaint] = await query(
       `SELECT
-         c.*,
+         c.id, c.complaint_number, c.source, c.status, c.location,
+         c.description, c.due_date, c.priority, c.created_at, c.updated_at,
+         c.tehsil_id, c.category_id, c.assigned_to, c.created_by,
          t.name AS tehsil_name,
          cc.name AS category_name,
          cc.sla_days,

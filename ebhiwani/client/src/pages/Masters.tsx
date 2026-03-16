@@ -184,7 +184,7 @@ export default function Masters() {
               className="btn-primary flex items-center gap-1.5 text-sm py-1.5 px-3"
             >
               <Plus className="w-3.5 h-3.5" />
-              {tab === 'tehsils' ? '+ Add Tehsil' : '+ Add Category'}
+              {tab === 'tehsils' ? 'Add Tehsil' : 'Add Category'}
             </button>
           </div>
         </div>
