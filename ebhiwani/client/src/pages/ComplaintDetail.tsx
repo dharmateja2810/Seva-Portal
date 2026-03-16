@@ -44,6 +44,9 @@ export default function ComplaintDetail() {
   const [notes, setNotes] = useState('');
   const [resolutionSummary, setResolutionSummary] = useState('');
   const [assignTo, setAssignTo] = useState('');
+  const [assignDueDate, setAssignDueDate] = useState('');
+  const [assignPriority, setAssignPriority] = useState('Medium');
+  const [assignComments, setAssignComments] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -84,11 +87,18 @@ export default function ComplaintDetail() {
 
   const assignMutation = useMutation({
     mutationFn: (assignedTo: number) =>
-      complaintsApi.assign(Number(id), { assignedTo }),
+      complaintsApi.assign(Number(id), {
+        assignedTo,
+        dueDate:  assignDueDate  || undefined,
+        priority: assignPriority || undefined,
+        comments: assignComments || undefined,
+      }),
     onSuccess: () => {
       toast.success('Complaint assigned');
       qc.invalidateQueries({ queryKey: ['complaint', id] });
       setAssignTo('');
+      setAssignDueDate('');
+      setAssignComments('');
     },
     onError: () => toast.error('Failed to assign'),
   });
@@ -145,8 +155,8 @@ export default function ComplaintDetail() {
     <span className="text-lg font-medium text-brand-500/70">Complaint not found</span>
   </div>;
 
-  const canEdit = user?.role !== 'dc_monitor';
-  const isAdmin = user?.role === 'phed_admin' || user?.role === 'phed_nodal';
+  const canEdit = user?.role !== 'dc_viewer';
+  const isAdmin = user?.role === 'phed_admin' || user?.role === 'system_admin';
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -345,22 +355,62 @@ export default function ComplaintDetail() {
             {isAdmin && (
               <div className="card p-5 space-y-3">
                 <h2 className="text-sm font-semibold text-brand-900">Assignment</h2>
-                <select
-                  value={assignTo}
-                  onChange={(e) => setAssignTo(e.target.value)}
-                  className="input-field"
-                >
-                  <option value="">Select officer...</option>
-                  {(staff ?? []).map((u: { id: number; full_name: string }) => (
-                    <option key={u.id} value={u.id}>{u.full_name}</option>
-                  ))}
-                </select>
+
+                <div>
+                  <label className="block text-xs font-medium text-brand-500/70 mb-1">Assign To</label>
+                  <select
+                    value={assignTo}
+                    onChange={(e) => setAssignTo(e.target.value)}
+                    className="input-field text-sm"
+                  >
+                    <option value="">Select officer…</option>
+                    {(staff ?? []).map((u: { id: number; full_name: string }) => (
+                      <option key={u.id} value={u.id}>{u.full_name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-brand-500/70 mb-1">Due Date</label>
+                    <input
+                      type="date"
+                      value={assignDueDate}
+                      onChange={(e) => setAssignDueDate(e.target.value)}
+                      className="input-field text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-brand-500/70 mb-1">Priority</label>
+                    <select
+                      value={assignPriority}
+                      onChange={(e) => setAssignPriority(e.target.value)}
+                      className="input-field text-sm"
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-brand-500/70 mb-1">Assignment Comments</label>
+                  <textarea
+                    value={assignComments}
+                    onChange={(e) => setAssignComments(e.target.value)}
+                    placeholder="Optional comments…"
+                    rows={2}
+                    className="input-field resize-none text-sm"
+                  />
+                </div>
+
                 <button
                   disabled={!assignTo || assignMutation.isPending}
                   onClick={() => assignMutation.mutate(Number(assignTo))}
                   className="btn-primary w-full"
                 >
-                  {assignMutation.isPending ? 'Assigning...' : 'Assign Complaint'}
+                  {assignMutation.isPending ? 'Assigning…' : 'Assign Complaint'}
                 </button>
               </div>
             )}

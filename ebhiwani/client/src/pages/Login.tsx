@@ -40,7 +40,9 @@ export default function LoginPage() {
       const { data } = await authApi.login(form);
       setAuth(data.accessToken, data.refreshToken, data.user);
       toast.success(`Welcome, ${data.user.fullName}`);
-      navigate(data.user.role === 'dc_monitor' ? '/dc/dashboard' : '/dashboard');
+      if (data.user.role === 'system_admin') navigate('/admin/users');
+      else if (data.user.role === 'dc_viewer') navigate('/dc/dashboard');
+      else navigate('/dashboard');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })
         ?.response?.data?.message ?? 'Login failed';

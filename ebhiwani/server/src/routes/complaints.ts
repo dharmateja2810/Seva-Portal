@@ -30,6 +30,7 @@ const assignSchema = z.object({
   assignedTo: z.number().int().positive(),
   dueDate: z.string().optional(),
   comments: z.string().max(500).optional(),
+  priority: z.enum(['Low', 'Medium', 'High']).optional(),
 });
 
 const listQuerySchema = z.object({
@@ -84,8 +85,8 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
       idx++;
     }
 
-    // DC monitors see all; operators see only their assignments or created
-    if (req.user!.role === 'phed_operator') {
+    // DC viewers see all; updaters see only their assignments or created
+    if (req.user!.role === 'phed_updater') {
       conditions.push(`(c.assigned_to = $${idx} OR c.created_by = $${idx})`);
       params.push(req.user!.userId);
       idx++;
@@ -191,7 +192,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
 // ── POST /api/complaints ────────────────────────────────────────
 router.post(
   '/',
-  authorize('phed_admin', 'phed_nodal', 'phed_operator'),
+  authorize('phed_admin', 'phed_updater', 'system_admin'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const body = createComplaintSchema.parse(req.body);
@@ -245,7 +246,7 @@ router.post(
 // ── PATCH /api/complaints/:id/status ───────────────────────────
 router.patch(
   '/:id/status',
-  authorize('phed_admin', 'phed_nodal', 'phed_operator'),
+  authorize('phed_admin', 'phed_updater', 'system_admin'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = parseInt(String(req.params['id'] ?? ''), 10);
@@ -295,7 +296,7 @@ router.patch(
 // ── POST /api/complaints/:id/assign ────────────────────────────
 router.post(
   '/:id/assign',
-  authorize('phed_admin', 'phed_nodal'),
+  authorize('phed_admin', 'system_admin'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = parseInt(String(req.params['id'] ?? ''), 10);
@@ -312,10 +313,11 @@ router.post(
 
       await query(
         `UPDATE complaints SET assigned_to = $1, due_date = COALESCE($2, due_date),
+         priority = COALESCE($4, priority),
          status = CASE WHEN status = 'New' THEN 'Pending' ELSE status END,
          updated_at = NOW()
          WHERE id = $3`,
-        [body.assignedTo, body.dueDate ?? null, id]
+        [body.assignedTo, body.dueDate ?? null, id, body.priority ?? null]
       );
 
       await query(
@@ -493,8 +495,8 @@ router.get('/report', async (req: Request, res: Response, next: NextFunction) =>
     if (from) { conditions.push(`DATE(c.created_at) >= $${idx++}`); params.push(from); }
     if (to)   { conditions.push(`DATE(c.created_at) <= $${idx++}`); params.push(to); }
 
-    // Operators see only their own
-    if (req.user!.role === 'phed_operator') {
+    // Updaters see only their own
+    if (req.user!.role === 'phed_updater') {
       conditions.push(`(c.assigned_to = $${idx} OR c.created_by = $${idx})`);
       params.push(req.user!.userId);
       idx++;

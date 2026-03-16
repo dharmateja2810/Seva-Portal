@@ -8,6 +8,8 @@ export interface AuthUser {
   email: string;
   role: string;
   moduleAccess: string[];
+  department?: string | null;
+  designation?: string | null;
 }
 
 interface AuthState {

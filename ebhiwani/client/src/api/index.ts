@@ -16,7 +16,7 @@ export const complaintsApi = {
   create: (data: Record<string, unknown>) => api.post('/complaints', data),
   updateStatus: (id: number, data: { status: string; notes?: string; resolutionSummary?: string }) =>
     api.patch(`/complaints/${id}/status`, data),
-  assign: (id: number, data: { assignedTo: number; dueDate?: string; comments?: string }) =>
+  assign: (id: number, data: { assignedTo: number; dueDate?: string; comments?: string; priority?: string }) =>
     api.post(`/complaints/${id}/assign`, data),
   stats: (params?: { range?: string; from?: string; to?: string }) =>
     api.get('/complaints/dashboard/stats', { params }),
@@ -40,6 +40,24 @@ export const mastersApi = {
   tehsils: () => api.get('/masters/tehsils'),
   categories: () => api.get('/masters/categories'),
   users: () => api.get('/masters/users'),
+  // Tehsil CRUD
+  createTehsil: (data: { name: string; district?: string }) =>
+    api.post('/masters/tehsils', data),
+  updateTehsil: (id: number, data: { name?: string; isActive?: boolean }) =>
+    api.patch(`/masters/tehsils/${id}`, data),
+  // Category CRUD
+  createCategory: (data: { name: string; sla_days?: number }) =>
+    api.post('/masters/categories', data),
+  updateCategory: (id: number, data: { name?: string; sla_days?: number; isActive?: boolean }) =>
+    api.patch(`/masters/categories/${id}`, data),
+};
+
+export const adminApi = {
+  getUsers: (search?: string) =>
+    api.get('/admin/users', { params: search ? { search } : {} }),
+  getUser: (id: number) => api.get(`/admin/users/${id}`),
+  createUser: (data: Record<string, unknown>) => api.post('/admin/users', data),
+  updateUser: (id: number, data: Record<string, unknown>) => api.patch(`/admin/users/${id}`, data),
 };
 
 export interface ReportFilters {

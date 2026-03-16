@@ -15,6 +15,7 @@ import authRoutes from './routes/auth';
 import complaintRoutes from './routes/complaints';
 import mastersRoutes from './routes/masters';
 import uploadRoutes from './routes/uploads';
+import adminRoutes from './routes/admin';
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/complaints', uploadRoutes);
 app.use('/api/masters', mastersRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ── Serve React frontend in production ──────────────────────────
 if (config.server.nodeEnv === 'production') {

@@ -35,6 +35,8 @@ interface UserRow {
   module_access: string[];
   password_hash: string;
   is_active: boolean;
+  department: string | null;
+  designation: string | null;
 }
 
 function generateTokens(user: UserRow) {
@@ -65,7 +67,8 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
     logger.info(`Login attempt for user: ${username}`);
 
     const [user] = await query<UserRow>(
-      `SELECT id, username, full_name, email, role, module_access, password_hash, is_active
+      `SELECT id, username, full_name, email, role, module_access, password_hash, is_active,
+              department, designation
        FROM users WHERE username = $1`,
       [username]
     );
@@ -118,6 +121,8 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
         email: user.email,
         role: user.role,
         moduleAccess: user.module_access,
+        department: user.department,
+        designation: user.designation,
       },
     });
   } catch (err) {
@@ -164,7 +169,8 @@ router.post('/refresh', async (req: Request, res: Response, next: NextFunction) 
     }
 
     const [user] = await query<UserRow>(
-      `SELECT id, username, full_name, email, role, module_access, password_hash, is_active
+      `SELECT id, username, full_name, email, role, module_access, password_hash, is_active,
+              department, designation
        FROM users WHERE id = $1 AND is_active = TRUE`,
       [decoded.userId]
     );

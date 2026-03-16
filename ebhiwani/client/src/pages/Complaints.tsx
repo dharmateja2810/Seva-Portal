@@ -7,11 +7,14 @@ import { complaintsApi, mastersApi } from '@/api';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Loader } from '@/components/Loader';
 import { Pagination } from '@/components/Pagination';
+import { useAuthStore } from '@/store/auth';
 
 const STATUSES = ['', 'New', 'Pending', 'In Progress', 'Resolved', 'Closed'];
 
 export default function Complaints() {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const canRegister = ['phed_admin', 'phed_updater'].includes(user?.role ?? '');
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -63,9 +66,11 @@ export default function Complaints() {
             </p>
           )}
         </div>
-        <button onClick={() => navigate('/register')} className="btn-primary flex items-center gap-2">
-          + Register Complaint
-        </button>
+        {canRegister && (
+          <button onClick={() => navigate('/register')} className="btn-primary flex items-center gap-2">
+            + Register Complaint
+          </button>
+        )}
       </div>
 
       {/* Filters */}
