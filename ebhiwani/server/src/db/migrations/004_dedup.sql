@@ -2,13 +2,33 @@
 -- Migration 004 — Deduplicate tables + add unique constraints
 -- ================================================================
 
--- 1. Remove duplicate tehsils (keep lowest id per name)
+-- 1. Re-point complaints to the canonical (lowest) tehsil id before deleting dupes
+UPDATE complaints
+SET tehsil_id = canon.min_id
+FROM (
+  SELECT MIN(id) AS min_id, name FROM tehsils GROUP BY name
+) AS canon
+JOIN tehsils t ON t.name = canon.name
+WHERE complaints.tehsil_id = t.id
+  AND t.id <> canon.min_id;
+
+-- 2. Remove duplicate tehsils (keep lowest id per name)
 DELETE FROM tehsils
 WHERE id NOT IN (
   SELECT MIN(id) FROM tehsils GROUP BY name
 );
 
--- 2. Remove duplicate complaint_categories (keep lowest id per name+module)
+-- 3. Re-point complaints to the canonical (lowest) category id before deleting dupes
+UPDATE complaints
+SET category_id = canon.min_id
+FROM (
+  SELECT MIN(id) AS min_id, name, module FROM complaint_categories GROUP BY name, module
+) AS canon
+JOIN complaint_categories c ON c.name = canon.name AND c.module = canon.module
+WHERE complaints.category_id = c.id
+  AND c.id <> canon.min_id;
+
+-- 4. Remove duplicate complaint_categories (keep lowest id per name+module)
 DELETE FROM complaint_categories
 WHERE id NOT IN (
   SELECT MIN(id) FROM complaint_categories GROUP BY name, module
